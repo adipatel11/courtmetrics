@@ -28,7 +28,7 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -42,11 +42,11 @@ export default function Home() {
 
   useEffect(() => {
     if (!rows.length) {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
       return;
     }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
     } catch (err) {
       console.error("Failed to persist rows to storage", err);
     }
