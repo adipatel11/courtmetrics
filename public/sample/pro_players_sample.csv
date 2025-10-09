@@ -1,0 +1,6 @@
+player,surface,matches,first_serve_pct,first_serve_points_won_pct,second_serve_points_won_pct,aces_per_match,double_faults_per_match,break_points_converted_pct,return_points_won_pct,winners_per_match,unforced_errors_per_match,win_rate_pct
+Novak Djokovic,Hard,35,64.0,75.0,56.0,7.2,2.1,43.0,42.0,28.0,16.0,85.0
+Jannik Sinner,Hard,40,62.0,78.0,54.0,9.5,2.6,45.0,40.0,31.0,18.0,82.0
+Carlos Alcaraz,Clay,28,65.0,73.0,55.0,5.1,2.9,46.0,41.0,30.0,20.0,80.0
+Iga Swiatek,Hard,38,63.0,72.0,57.0,3.8,2.2,48.0,44.0,26.0,15.0,84.0
+Coco Gauff,Hard,36,60.0,68.0,53.0,4.2,3.0,42.0,41.0,24.0,19.0,78.0
