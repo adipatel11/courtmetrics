@@ -1,0 +1,40 @@
+export type MatchRow = {
+  date: string;
+  opponent?: string;
+  location?: string;
+  surface?: "Hard" | "Clay" | "Grass" | string;
+  match_format?: string;
+  outcome?: "Win" | "Loss" | string;
+  sets_played?: number;
+  sets_won?: number;
+  games_won?: number;
+  games_lost?: number;
+  first_serves_made: number;
+  first_serves_attempted: number;
+  aces?: number;
+  double_faults?: number;
+  first_serve_points_won: number;
+  first_serve_points_total: number;
+  second_serve_points_won: number;
+  second_serve_points_total: number;
+  break_points_won?: number;
+  break_points_total?: number;
+  return_points_won?: number;
+  return_points_total?: number;
+  winners?: number;
+  unforced_errors?: number;
+  net_points_won?: number;
+  net_points_total?: number;
+  avg_rally_length?: number;
+  notes?: string;
+};
+
+export type Kpis = {
+  firstServePct: number;
+  firstServePtsWonPct: number;
+  secondServePtsWonPct: number;
+  bpConversionPct: number | null;
+  returnPtsWonPct: number | null;
+  wueRatio: number | null;
+  winRatePct: number | null;
+};
