@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { parseCsv } from "@/lib/csv";
 import {
@@ -20,9 +20,37 @@ import WinnersVsUEs from "@/components/charts/WinnersVsUEs";
 import BPConversion from "@/components/charts/BPConversion";
 import ReturnPtsWon from "@/components/charts/ReturnPtsWon";
 
+const STORAGE_KEY = "tsv-upload-rows";
+
 export default function Home() {
   const [rows, setRows] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setRows(parsed);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to restore rows from storage", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!rows.length) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+    } catch (err) {
+      console.error("Failed to persist rows to storage", err);
+    }
+  }, [rows]);
 
   const clean = useMemo(() => sanitize(rows as any[]), [rows]);
   const metrics = useMemo(() => (clean.length ? kpis(clean) : null), [clean]);
@@ -58,7 +86,7 @@ export default function Home() {
               setError(err?.message || "Failed to parse CSV");
             }
           }}
-          className="block"
+          className="block w-full text-sm text-neutral-100 file:mr-4 file:rounded-md file:border-0 file:bg-neutral-800 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-neutral-100 file:transition-colors file:cursor-pointer hover:file:bg-neutral-700"
         />
         {error && <div className="mt-2 text-red-400 text-sm">{error}</div>}
       </div>
