@@ -116,7 +116,7 @@ export default function ProsPage() {
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold">Pros</h1>
         <Link href="/" className="underline underline-offset-4">
-          Home ↩
+          Home
         </Link>
       </header>
 
