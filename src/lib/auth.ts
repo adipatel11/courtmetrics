@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { createHmac, randomBytes } from "crypto";
 
 const SALT_ROUNDS = 12;
-export const SESSION_COOKIE = "tsv_session";
+export const SESSION_COOKIE = "cm_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 function getSessionSecret() {

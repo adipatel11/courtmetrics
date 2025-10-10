@@ -1,4 +1,4 @@
-## Tennis Stats Visualizer
+## CourtMetrics
 
 Secure player authentication and stat charting built with Next.js 15, React 19, and Tailwind.
 
@@ -24,8 +24,8 @@ cp .env.local.example .env.local
 | --- | --- |
 | `AWS_REGION` | AWS region where your DynamoDB table lives (e.g. `us-east-1`). |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Programmatic IAM credentials with DynamoDB permissions. |
-| `AWS_DYNAMO_USERS_TABLE` | DynamoDB table for auth users (default `tsv-users`). |
-| `AWS_DYNAMO_MATCHES_TABLE` | DynamoDB table for match records (default `tsv-matches`). |
+| `AWS_DYNAMO_USERS_TABLE` | DynamoDB table for auth users (default `cm-users`). |
+| `AWS_DYNAMO_MATCHES_TABLE` | DynamoDB table for match records (default `cm-matches`). |
 | `SESSION_SECRET` | 64+ char random string for signing session cookies. |
 
 ### DynamoDB Tables
@@ -58,7 +58,7 @@ Visit `http://localhost:3000` for the landing page and `http://localhost:3000/da
    ```json
    { "email": "player@example.com", "hashedPassword": "...", "createdAt": "ISO8601" }
    ```
-3. Subsequent logins verify the hash and set the `tsv_session` HTTP-only cookie.
+3. Subsequent logins verify the hash and set the `cm_session` HTTP-only cookie.
 4. Logout from the dashboard to clear the cookie.
 
 ### Project Scripts

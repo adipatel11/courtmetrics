@@ -6,7 +6,7 @@ import { readSessionToken, SESSION_COOKIE } from "@/lib/auth";
 import NavLinks from "@/components/navigation/NavLinks";
 
 export const metadata: Metadata = {
-  title: "Tennis Stats Visualizer",
+  title: "CourtMetrics",
   description:
     "Upload tennis match stats, visualize performance, and manage secure player accounts.",
 };
@@ -27,9 +27,9 @@ export default async function RootLayout({
           <header className="flex flex-wrap items-center justify-between gap-4 pb-8">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500 text-neutral-950">
-                TSV
+                CM
               </span>
-              Tennis Stats Visualizer
+              CourtMetrics
             </Link>
             <NavLinks isAuthenticated={Boolean(session)} />
           </header>

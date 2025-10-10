@@ -220,7 +220,7 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm text-neutral-400">Signed in as {userEmail}</p>
-          <h1 className="text-3xl font-semibold">Tennis Stats Visualizer</h1>
+          <h1 className="text-3xl font-semibold">CourtMetrics</h1>
         </div>
         <button
           type="button"

@@ -1,6 +1,6 @@
 ## AWS Setup Guide
 
-Follow these steps to create the AWS resources and credentials needed by the Tennis Stats Visualizer authentication flow.
+Follow these steps to create the AWS resources and credentials needed by the CourtMetrics authentication flow.
 
 ### 1. Create / Sign In to AWS
 1. Visit [aws.amazon.com](https://aws.amazon.com/) and sign in or create a new AWS account.
@@ -8,7 +8,7 @@ Follow these steps to create the AWS resources and credentials needed by the Ten
 
 ### 2. Create an IAM User
 1. Navigate to **IAM → Users → Create user**.
-2. Enter a user name such as `tsv-service-user`.
+2. Enter a user name such as `cm-service-user`.
 3. **Programmatic access**: Enable the checkbox (if the wizard still asks, choose “Application running outside AWS”).
 4. **Console access** (optional): leave disabled unless you plan to sign in with this user. If enabled, let AWS auto-generate the initial password.
 5. Permissions:
@@ -22,8 +22,8 @@ Follow these steps to create the AWS resources and credentials needed by the Ten
            "Effect": "Allow",
            "Action": ["dynamodb:GetItem", "dynamodb:PutItem"],
            "Resource": [
-             "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/tsv-users",
-             "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/tsv-matches"
+             "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/cm-users",
+             "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/cm-matches"
            ]
          }
        ]
@@ -37,13 +37,13 @@ Create two tables—one for users and one for match stats.
 
 **Users table**
 1. Go to **DynamoDB → Tables → Create table**.
-2. Table name: `tsv-users` (or match the value you plan to use in `AWS_DYNAMO_USERS_TABLE`).
+2. Table name: `cm-users` (or match the value you plan to use in `AWS_DYNAMO_USERS_TABLE`).
 3. Partition key: `email` (String). Leave sort key empty.
 4. Capacity mode: `On-demand` is fine for most projects; you can switch to provisioned later.
 5. Create the table and wait for status `Active`.
 
 **Matches table**
-1. Create another table named `tsv-matches` (or match `AWS_DYNAMO_MATCHES_TABLE`).
+1. Create another table named `cm-matches` (or match `AWS_DYNAMO_MATCHES_TABLE`).
 2. Partition key: `userEmail` (String).
 3. Sort key: `matchId` (String).
 4. Same capacity settings as above.
@@ -58,15 +58,15 @@ Create two tables—one for users and one for match stats.
    - `AWS_REGION`: e.g., `us-east-1` (must match the table’s region).
    - `AWS_ACCESS_KEY_ID`: paste the value from the IAM CSV.
    - `AWS_SECRET_ACCESS_KEY`: paste the secret key from the IAM CSV.
-   - `AWS_DYNAMO_USERS_TABLE`: exact table name (`tsv-users` if you used the default).
-   - `AWS_DYNAMO_MATCHES_TABLE`: match table name (`tsv-matches` if you used the default).
+   - `AWS_DYNAMO_USERS_TABLE`: exact table name (`cm-users` if you used the default).
+   - `AWS_DYNAMO_MATCHES_TABLE`: match table name (`cm-matches` if you used the default).
    - `SESSION_SECRET`: run `openssl rand -hex 64` (macOS/Linux) or use another high-entropy random string (≥64 chars).
 
 ### 5. Verify Locally
 1. Install dependencies if you haven’t already: `npm install`.
 2. Run `npm run dev`.
-3. In the browser, go to `http://localhost:3000`, create an account, then check DynamoDB → Tables → `tsv-users` → `Explore table items` to confirm a new auth record.
-4. Add a match from the dashboard and confirm `tsv-matches` now contains a row with your `userEmail`.
+3. In the browser, go to `http://localhost:3000`, create an account, then check DynamoDB → Tables → `cm-users` → `Explore table items` to confirm a new auth record.
+4. Add a match from the dashboard and confirm `cm-matches` now contains a row with your `userEmail`.
 
 ### 6. Deployment Checklist
 - Mirror the same environment variables wherever you deploy (Vercel, Amplify, etc.).
