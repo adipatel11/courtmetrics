@@ -527,5 +527,4 @@ function StatInput({ label, value, onChange, required }: StatInputProps) {
       />
     </label>
   );
-
-  *** End Patch
+}
