@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Tennis Stats Visualizer
 
-## Getting Started
+Secure player authentication and stat charting built with Next.js 15, React 19, and Tailwind.
 
-First, run the development server:
+### Features
+- Landing page with login/sign-up toggle and security callouts.
+- Password hashing with `bcryptjs`; never stores plaintext credentials.
+- AWS DynamoDB persistence via the AWS SDK v3 document client.
+- Signed, HTTP-only cookie sessions with a 7-day TTL.
+- Authenticated dashboard for CSV uploads and Recharts visualizations.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Prerequisites
+- Node.js 18+ and npm (ships with the project scaffold).
+- AWS account with IAM permissions for DynamoDB.
+
+### Environment Variables
+Copy `.env.local.example` to `.env.local` and paste your actual secrets in place of the placeholders:
+
+```
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable | Description |
+| --- | --- |
+| `AWS_REGION` | AWS region where your DynamoDB table lives (e.g. `us-east-1`). |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Programmatic IAM credentials with DynamoDB permissions. |
+| `AWS_DYNAMO_USERS_TABLE` | DynamoDB table for auth users (default `tsv-users`). |
+| `SESSION_SECRET` | 64+ char random string for signing session cookies. |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### DynamoDB Table
+Provision a table that matches the expected schema:
+- Table name: value from `AWS_DYNAMO_USERS_TABLE`.
+- Partition key: `email` (String).
+- No sort key required.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Grant the IAM identity `dynamodb:PutItem` and `dynamodb:GetItem` permissions on the table.
 
-## Learn More
+### Install Dependencies
+Install the new runtime dependencies (AWS SDK + bcryptjs):
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Local Development
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Visit `http://localhost:3000` for the landing page and `http://localhost:3000/dashboard` after signing in.
 
-## Deploy on Vercel
+### Testing Authentication
+1. Register with an email + password (hashed before storage).
+2. DynamoDB will contain records shaped as:
+   ```json
+   { "email": "player@example.com", "hashedPassword": "...", "createdAt": "ISO8601" }
+   ```
+3. Subsequent logins verify the hash and set the `tsv_session` HTTP-only cookie.
+4. Logout from the dashboard to clear the cookie.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Project Scripts
+- `npm run dev` – Next dev server with Turbopack.
+- `npm run build` – Production build.
+- `npm run lint` – ESLint across the project.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Notes
+- The session token uses HMAC-SHA256 and expires after 7 days.
+- Client CSV uploads persist temporarily in `sessionStorage`.
+- Update Tailwind tokens and copy variants in `globals.css` or component-level classes.
+
+### AWS Setup Reference
+Detailed walkthrough: [`docs/aws-setup.md`](docs/aws-setup.md)

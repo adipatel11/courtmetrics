@@ -42,9 +42,9 @@ export default function ProsPage() {
     (async () => {
       const res = await fetch("/sample/pro_players_sample.csv");
       const text = await res.text();
-      const parsed = await parseCsvText(text);
-      setRows(parsed as unknown as ProRow[]);
-      if (parsed.length) setPlayer((parsed[0] as any).player);
+      const parsed = await parseCsvText<ProRow>(text);
+      setRows(parsed);
+      if (parsed.length) setPlayer(parsed[0].player);
     })();
   }, []);
 

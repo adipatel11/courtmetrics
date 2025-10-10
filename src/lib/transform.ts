@@ -27,7 +27,6 @@ export function sanitize(rows: MatchRow[]): MatchRow[] {
 }
 
 export function kpis(rows: MatchRow[]): Kpis {
-  const n = rows.length || 1;
   const sum = (f: (r: MatchRow) => number) =>
     rows.reduce((a, r) => a + (f(r) || 0), 0);
 

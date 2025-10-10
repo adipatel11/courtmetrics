@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.654.0",
+    "@aws-sdk/lib-dynamodb": "^3.654.0",
+    "bcryptjs": "^2.4.3",
     "next": "15.5.4",
     "papaparse": "^5.5.3",
     "react": "19.1.0",

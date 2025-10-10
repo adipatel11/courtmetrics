@@ -1,112 +1,54 @@
-"use client";
-import { useEffect, useMemo, useState } from "react";
+import { cookies } from "next/headers";
 import Link from "next/link";
-import { parseCsv } from "@/lib/csv";
-import {
-  sanitize,
-  kpis,
-  seriesFirstServePct,
-  seriesServePointsWon,
-  seriesAcesDf,
-  seriesWinnersUEs,
-  seriesBpConv,
-  seriesReturnPtsWon,
-} from "@/lib/transform";
-import KpiHeader from "@/components/KpiHeader";
-import FirstServePct from "@/components/charts/FirstServePct";
-import ServePointsWon from "@/components/charts/ServePointsWon";
-import AcesVsDF from "@/components/charts/AcesVsDF";
-import WinnersVsUEs from "@/components/charts/WinnersVsUEs";
-import BPConversion from "@/components/charts/BPConversion";
-import ReturnPtsWon from "@/components/charts/ReturnPtsWon";
+import { redirect } from "next/navigation";
+import LandingClient from "@/components/auth/LandingClient";
+import { readSessionToken, SESSION_COOKIE } from "@/lib/auth";
 
-const STORAGE_KEY = "tsv-upload-rows";
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(SESSION_COOKIE)?.value;
+  const session = sessionCookie ? readSessionToken(sessionCookie) : null;
 
-export default function Home() {
-  const [rows, setRows] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setRows(parsed);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to restore rows from storage", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!rows.length) {
-      sessionStorage.removeItem(STORAGE_KEY);
-      return;
-    }
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-    } catch (err) {
-      console.error("Failed to persist rows to storage", err);
-    }
-  }, [rows]);
-
-  const clean = useMemo(() => sanitize(rows as any[]), [rows]);
-  const metrics = useMemo(() => (clean.length ? kpis(clean) : null), [clean]);
+  if (session) {
+    redirect("/dashboard");
+  }
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Tennis Stats Visualizer</h1>
-        <Link href="/pros" className="underline underline-offset-4">
-          Pros ↗
-        </Link>
-      </header>
-
-      <div className="rounded-2xl bg-neutral-900 p-4">
-        <p className="mb-3 text-sm text-neutral-300">
-          Upload your CSV (use the template you downloaded). You can try the
-          bundled sample:
-          <code className="ml-2 text-neutral-100">
-            /sample/tennis_stats_sample.csv
-          </code>
-        </p>
-        <input
-          type="file"
-          accept=".csv"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            try {
-              setError(null);
-              const parsed = await parseCsv(file);
-              setRows(parsed);
-            } catch (err: any) {
-              setError(err?.message || "Failed to parse CSV");
-            }
-          }}
-          className="block w-full text-sm text-neutral-100 file:mr-4 file:rounded-md file:border-0 file:bg-neutral-800 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-neutral-100 file:transition-colors file:cursor-pointer hover:file:bg-neutral-700"
-        />
-        {error && <div className="mt-2 text-red-400 text-sm">{error}</div>}
-      </div>
-
-      {!clean.length ? (
-        <div className="text-neutral-400 text-sm">
-          No data yet — upload a CSV to see charts.
+    <div className="space-y-12 py-8">
+      <div className="space-y-4">
+        <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/40 bg-teal-500/10 px-4 py-1 text-xs uppercase tracking-wide text-teal-300">
+          Secure Tennis Analytics
         </div>
-      ) : (
-        <>
-          {metrics && <KpiHeader k={metrics} />}
-
-          <FirstServePct data={seriesFirstServePct(clean)} />
-          <ServePointsWon data={seriesServePointsWon(clean)} />
-          <AcesVsDF data={seriesAcesDf(clean)} />
-          <WinnersVsUEs data={seriesWinnersUEs(clean)} />
-          <BPConversion data={seriesBpConv(clean)} />
-          <ReturnPtsWon data={seriesReturnPtsWon(clean)} />
-        </>
-      )}
+        <h1 className="max-w-2xl text-4xl font-semibold leading-tight md:text-5xl">
+          Visualize every match with private-by-default player accounts.
+        </h1>
+        <p className="max-w-2xl text-sm text-neutral-400 md:text-base">
+          Create a free login, securely sync your CSV uploads, and unlock the
+          charting dashboard tailored to competitive players and coaches.
+          Passwords are hashed server-side with bcrypt and stored only in your
+          AWS DynamoDB table.
+        </p>
+        <div className="flex flex-wrap gap-3 text-sm text-neutral-400">
+          <div className="rounded-full border border-neutral-800 px-3 py-1">
+            Bcrypt hashing
+          </div>
+          <div className="rounded-full border border-neutral-800 px-3 py-1">
+            DynamoDB storage
+          </div>
+          <div className="rounded-full border border-neutral-800 px-3 py-1">
+            Session cookies
+          </div>
+        </div>
+        <div>
+          <Link
+            href="/pros"
+            className="inline-flex items-center gap-2 text-sm underline underline-offset-4 text-neutral-400 hover:text-neutral-100"
+          >
+            See example data
+          </Link>
+        </div>
+      </div>
+      <LandingClient />
     </div>
   );
 }

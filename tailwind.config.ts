@@ -1,4 +1,6 @@
 // tailwind.config.ts
-export default {
+const config = {
   // optional: add theme/customizations later
 };
+
+export default config;
