@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { parseCsvText } from "@/lib/csv";
 import { Kpis } from "@/lib/types";
@@ -115,9 +114,6 @@ export default function ProsPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold">Pros</h1>
-        <Link href="/" className="underline underline-offset-4">
-          Home
-        </Link>
       </header>
 
       <div className="rounded-2xl bg-neutral-900 p-4">

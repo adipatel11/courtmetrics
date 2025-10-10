@@ -23,10 +23,9 @@ export default async function LandingPage() {
           Visualize every match with private-by-default player accounts.
         </h1>
         <p className="max-w-2xl text-sm text-neutral-400 md:text-base">
-          Create a free login, securely sync your CSV uploads, and unlock the
-          charting dashboard tailored to competitive players and coaches.
-          Passwords are hashed server-side with bcrypt and stored only in your
-          AWS DynamoDB table.
+          Create a free login, enter match stats through a guided form, and see
+          charts update instantly. Passwords are hashed server-side with bcrypt
+          and your data lives safely in your own AWS DynamoDB tables.
         </p>
         <div className="flex flex-wrap gap-3 text-sm text-neutral-400">
           <div className="rounded-full border border-neutral-800 px-3 py-1">
@@ -34,6 +33,9 @@ export default async function LandingPage() {
           </div>
           <div className="rounded-full border border-neutral-800 px-3 py-1">
             DynamoDB storage
+          </div>
+          <div className="rounded-full border border-neutral-800 px-3 py-1">
+            Persistent match history
           </div>
           <div className="rounded-full border border-neutral-800 px-3 py-1">
             Session cookies

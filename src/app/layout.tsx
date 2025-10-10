@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { readSessionToken, SESSION_COOKIE } from "@/lib/auth";
+import NavLinks from "@/components/navigation/NavLinks";
 
 export const metadata: Metadata = {
   title: "Tennis Stats Visualizer",
@@ -30,29 +31,7 @@ export default async function RootLayout({
               </span>
               Tennis Stats Visualizer
             </Link>
-            <nav className="flex items-center gap-4 text-sm text-neutral-300">
-              <Link
-                href="/pros"
-                className="hover:text-neutral-50 transition-colors"
-              >
-                Pros
-              </Link>
-              {session ? (
-                <Link
-                  href="/dashboard"
-                  className="hover:text-neutral-50 transition-colors"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <Link
-                  href="/#auth"
-                  className="hover:text-neutral-50 transition-colors"
-                >
-                  Get started
-                </Link>
-              )}
-            </nav>
+            <NavLinks isAuthenticated={Boolean(session)} />
           </header>
           <main className="flex-1">{children}</main>
           <footer className="pt-10 text-center text-xs text-neutral-500">

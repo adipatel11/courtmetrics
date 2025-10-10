@@ -7,7 +7,7 @@ Secure player authentication and stat charting built with Next.js 15, React 19, 
 - Password hashing with `bcryptjs`; never stores plaintext credentials.
 - AWS DynamoDB persistence via the AWS SDK v3 document client.
 - Signed, HTTP-only cookie sessions with a 7-day TTL.
-- Authenticated dashboard for CSV uploads and Recharts visualizations.
+- Authenticated dashboard with guided match entry and Recharts visualizations.
 
 ### Prerequisites
 - Node.js 18+ and npm (ships with the project scaffold).
@@ -25,15 +25,18 @@ cp .env.local.example .env.local
 | `AWS_REGION` | AWS region where your DynamoDB table lives (e.g. `us-east-1`). |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Programmatic IAM credentials with DynamoDB permissions. |
 | `AWS_DYNAMO_USERS_TABLE` | DynamoDB table for auth users (default `tsv-users`). |
+| `AWS_DYNAMO_MATCHES_TABLE` | DynamoDB table for match records (default `tsv-matches`). |
 | `SESSION_SECRET` | 64+ char random string for signing session cookies. |
 
-### DynamoDB Table
-Provision a table that matches the expected schema:
-- Table name: value from `AWS_DYNAMO_USERS_TABLE`.
-- Partition key: `email` (String).
-- No sort key required.
+### DynamoDB Tables
+Provision two tables that match the expected schemas:
+- **Users table** (`AWS_DYNAMO_USERS_TABLE`)
+  - Partition key: `email` (String)
+- **Matches table** (`AWS_DYNAMO_MATCHES_TABLE`)
+  - Partition key: `userEmail` (String)
+  - Sort key: `matchId` (String)
 
-Grant the IAM identity `dynamodb:PutItem` and `dynamodb:GetItem` permissions on the table.
+Grant the IAM identity `dynamodb:PutItem` and `dynamodb:GetItem` permissions on both tables.
 
 ### Install Dependencies
 Install the new runtime dependencies (AWS SDK + bcryptjs):
@@ -65,7 +68,7 @@ Visit `http://localhost:3000` for the landing page and `http://localhost:3000/da
 
 ### Notes
 - The session token uses HMAC-SHA256 and expires after 7 days.
-- Client CSV uploads persist temporarily in `sessionStorage`.
+- Match stats are stored per-user in DynamoDB and rehydrated on login.
 - Update Tailwind tokens and copy variants in `globals.css` or component-level classes.
 
 ### AWS Setup Reference
