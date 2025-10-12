@@ -13,12 +13,13 @@ import ReturnPtsWon from "@/components/charts/ReturnPtsWon";
 /**
  * The pro CSV is aggregated by player/surface, so we adapt it into a per-row structure.
  * Columns expected:
- * player,surface,matches,first_serve_pct,first_serve_points_won_pct,second_serve_points_won_pct,
+ * player,date,surface,matches,first_serve_pct,first_serve_points_won_pct,second_serve_points_won_pct,
  * aces_per_match,double_faults_per_match,break_points_converted_pct,return_points_won_pct,
  * winners_per_match,unforced_errors_per_match,win_rate_pct
  */
 type ProRow = {
   player: string;
+  date?: string | null;
   surface: string;
   matches: number;
   first_serve_pct: number;
@@ -49,34 +50,53 @@ export default function ProsPage() {
 
   const options = Array.from(new Set(rows.map((r) => r.player)));
 
-  const filtered = rows.filter((r) => r.player === player);
+  const toTimestamp = (value?: string | null) => {
+    if (!value) return Number.NaN;
+    const ms = Date.parse(value);
+    return Number.isFinite(ms) ? ms : Number.NaN;
+  };
 
-  // Adapt to chart series shapes (we'll fake "date" with surface labels)
+  const filtered = rows.filter((r) => r.player === player).sort((a, b) => {
+    const aTs = toTimestamp(a.date);
+    const bTs = toTimestamp(b.date);
+    const aHasDate = !Number.isNaN(aTs);
+    const bHasDate = !Number.isNaN(bTs);
+    if (aHasDate && bHasDate && aTs !== bTs) {
+      return aTs - bTs;
+    }
+    if (aHasDate && !bHasDate) return -1;
+    if (!aHasDate && bHasDate) return 1;
+    return a.surface.localeCompare(b.surface);
+  });
+
+  const labelFor = (row: ProRow) => row.date || row.surface;
+
+  // Adapt to chart series shapes, preferring match dates and falling back to surface labels
   const firstServeSeries = filtered.map((r) => ({
-    date: r.surface,
+    date: labelFor(r),
     pct: r.first_serve_pct,
   }));
   const servePtsSeries = filtered.map((r) => ({
-    date: r.surface,
+    date: labelFor(r),
     first: r.first_serve_points_won_pct,
     second: r.second_serve_points_won_pct,
   }));
   const acesDfSeries = filtered.map((r) => ({
-    date: r.surface,
+    date: labelFor(r),
     aces: r.aces_per_match,
     doubleFaults: r.double_faults_per_match,
   }));
   const wueSeries = filtered.map((r) => ({
-    date: r.surface,
+    date: labelFor(r),
     winners: r.winners_per_match,
     ues: r.unforced_errors_per_match,
   }));
   const bpSeries = filtered.map((r) => ({
-    date: r.surface,
+    date: labelFor(r),
     bpPct: r.break_points_converted_pct,
   }));
   const rpwSeries = filtered.map((r) => ({
-    date: r.surface,
+    date: labelFor(r),
     pct: r.return_points_won_pct,
   }));
 
