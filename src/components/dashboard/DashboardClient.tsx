@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   sanitize,
@@ -79,6 +79,76 @@ const initialForm: MatchFormState = {
   notes: "",
 };
 
+const toNonNegativeNumber = (value: string) => {
+  if (!value.trim()) return null;
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < 0) return null;
+  return num;
+};
+
+const validateForm = (form: MatchFormState): string | null => {
+  if (!form.date.trim()) {
+    return "Please enter the match date.";
+  }
+
+  if (!form.first_serves_attempted.trim()) {
+    return "Enter the number of first serves attempted.";
+  }
+
+  if (!form.first_serves_made.trim()) {
+    return "Enter the number of first serves made.";
+  }
+
+  const attempts = toNonNegativeNumber(form.first_serves_attempted);
+  const made = toNonNegativeNumber(form.first_serves_made);
+  if (attempts === null || made === null) {
+    return "Serve counts must be non-negative numbers.";
+  }
+  if (made > attempts) {
+    return "First serves made cannot exceed attempts.";
+  }
+
+  const checkWonVsTotal = (
+    wonValue: string,
+    totalValue: string,
+    label: string
+  ) => {
+    if (!wonValue.trim() || !totalValue.trim()) return null;
+    const won = toNonNegativeNumber(wonValue);
+    const total = toNonNegativeNumber(totalValue);
+    if (won === null || total === null) {
+      return `${label} must be non-negative numbers.`;
+    }
+    if (won > total) {
+      return `${label} won cannot exceed total.`;
+    }
+    return null;
+  };
+
+  return (
+    checkWonVsTotal(
+      form.first_serve_points_won,
+      form.first_serve_points_total,
+      "1st serve points"
+    ) ||
+    checkWonVsTotal(
+      form.second_serve_points_won,
+      form.second_serve_points_total,
+      "2nd serve points"
+    ) ||
+    checkWonVsTotal(
+      form.break_points_won,
+      form.break_points_total,
+      "Break points"
+    ) ||
+    checkWonVsTotal(
+      form.return_points_won,
+      form.return_points_total,
+      "Return points"
+    )
+  );
+};
+
 const numberFromInput = (value: string) => {
   if (!value.trim()) return 0;
   const num = Number(value);
@@ -96,42 +166,61 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
   const [matches, setMatches] = useState<StoredMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [form, setForm] = useState<MatchFormState>(initialForm);
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/matches", {
-          credentials: "include",
-          cache: "no-store",
-        });
-        if (!res.ok) {
-          const payload = await res.json().catch(() => ({}));
-          throw new Error(payload?.error || "Unable to load matches");
-        }
-        const payload = (await res.json()) as {
-          matches: Array<{ matchId: string; match: MatchRow; createdAt: string }>;
-        };
-        setMatches(payload.matches);
-      } catch (err) {
-        console.error("Failed to load matches", err);
-        setError(err instanceof Error ? err.message : "Failed to load matches");
-      } finally {
-        setLoading(false);
+  const loadMatches = useCallback(async () => {
+    try {
+      const res = await fetch("/api/matches", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.error || "Unable to load matches");
       }
-    })();
+      const payload = (await res.json()) as {
+        matches: Array<{ matchId: string; match: MatchRow; createdAt: string }>;
+      };
+      setMatches(
+        payload.matches.slice().sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        })
+      );
+    } catch (err) {
+      console.error("Failed to load matches", err);
+      setError(err instanceof Error ? err.message : "Failed to load matches");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadMatches();
+  }, [loadMatches]);
 
   const handleFieldChange = (field: keyof MatchFormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setError(null);
+    setSuccess(null);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
     setError(null);
+    setSuccess(null);
+
+    const validationError = validateForm(form);
+    if (validationError) {
+      setError(validationError);
+      setSaving(false);
+      return;
+    }
 
     const body = {
       date: form.date,
@@ -157,18 +246,6 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       notes: form.notes,
     };
 
-    if (!body.date) {
-      setSaving(false);
-      setError("Please provide a match date.");
-      return;
-    }
-
-    if (!form.first_serves_attempted.trim()) {
-      setSaving(false);
-      setError("Enter the number of first serve attempts.");
-      return;
-    }
-
     try {
       const res = await fetch("/api/matches", {
         method: "POST",
@@ -183,8 +260,21 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       }
 
       const payload = (await res.json()) as StoredMatch;
-      setMatches((prev) => [...prev, payload]);
-      setForm(initialForm);
+      const sanitizedMatch = sanitize([payload.match])[0] ?? payload.match;
+      setMatches((prev) =>
+        [...prev, { ...payload, match: sanitizedMatch }].sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        })
+      );
+      setForm((prev) => ({
+        ...initialForm,
+        surface: prev.surface || initialForm.surface,
+        match_format: prev.match_format || initialForm.match_format,
+        outcome: prev.outcome || initialForm.outcome,
+      }));
+      setSuccess("Match saved and analytics updated.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save match");
     } finally {
@@ -247,7 +337,6 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
                 value={form.date}
                 onChange={(event) => handleFieldChange("date", event.target.value)}
                 className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none"
-                required
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -321,7 +410,6 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
                 label="First serves made"
                 value={form.first_serves_made}
                 onChange={(value) => handleFieldChange("first_serves_made", value)}
-                required
               />
               <StatInput
                 label="First serves attempted"
@@ -329,7 +417,6 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
                 onChange={(value) =>
                   handleFieldChange("first_serves_attempted", value)
                 }
-                required
               />
               <StatInput
                 label="1st serve points won"
@@ -430,11 +517,8 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
             />
           </label>
 
-          {error && (
-            <p className="text-sm text-red-400">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          {success && <p className="text-sm text-teal-400">{success}</p>}
 
           <div className="flex justify-end">
             <button
