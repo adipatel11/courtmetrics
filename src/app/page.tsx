@@ -20,7 +20,7 @@ export default async function LandingPage() {
           Secure Tennis Analytics
         </div>
         <h1 className="mx-auto max-w-2xl text-4xl font-semibold leading-tight md:text-5xl">
-          Visualize every match with private-by-default player accounts.
+          Visualize every match with personal player analytics.
         </h1>
         <p className="mx-auto max-w-2xl text-sm text-neutral-400 md:text-base">
           Create a free login, enter match stats through a guided form, and see
