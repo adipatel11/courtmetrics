@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: "CourtMetrics",
   description:
     "Upload tennis match stats, visualize performance, and manage secure player accounts.",
+  icons: {
+    icon: "/favicon-teal.svg",
+    shortcut: "/favicon-teal.svg",
+  },
 };
 
 export default async function RootLayout({
