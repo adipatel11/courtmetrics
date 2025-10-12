@@ -15,19 +15,19 @@ export default async function LandingPage() {
 
   return (
     <div className="space-y-12 py-8">
-      <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/40 bg-teal-500/10 px-4 py-1 text-xs uppercase tracking-wide text-teal-300">
+      <div className="space-y-4 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/40 bg-teal-500/10 px-4 py-1 text-xs uppercase tracking-wide text-teal-300 mx-auto">
           Secure Tennis Analytics
         </div>
-        <h1 className="max-w-2xl text-4xl font-semibold leading-tight md:text-5xl">
+        <h1 className="mx-auto max-w-2xl text-4xl font-semibold leading-tight md:text-5xl">
           Visualize every match with private-by-default player accounts.
         </h1>
-        <p className="max-w-2xl text-sm text-neutral-400 md:text-base">
+        <p className="mx-auto max-w-2xl text-sm text-neutral-400 md:text-base">
           Create a free login, enter match stats through a guided form, and see
           charts update instantly. Passwords are hashed server-side with bcrypt
           and your data lives safely in your own AWS DynamoDB tables.
         </p>
-        <div className="flex flex-wrap gap-3 text-sm text-neutral-400">
+        <div className="flex flex-wrap justify-center gap-3 text-sm text-neutral-400">
           <div className="rounded-full border border-neutral-800 px-3 py-1">
             Bcrypt hashing
           </div>
@@ -41,7 +41,7 @@ export default async function LandingPage() {
             Session cookies
           </div>
         </div>
-        <div>
+        <div className="flex justify-center">
           <Link
             href="/pros"
             className="inline-flex items-center gap-2 text-sm underline underline-offset-4 text-neutral-400 hover:text-neutral-100"
