@@ -79,6 +79,22 @@ const initialForm: MatchFormState = {
   notes: "",
 };
 
+const toTimestamp = (value?: string) => {
+  if (!value) return 0;
+  const ms = Date.parse(value);
+  return Number.isFinite(ms) ? ms : 0;
+};
+
+const sortMatchesDesc = (records: StoredMatch[]) =>
+  records
+    .slice()
+    .sort((a, b) => {
+      const byMatchDate =
+        toTimestamp(b.match?.date) - toTimestamp(a.match?.date);
+      if (byMatchDate !== 0) return byMatchDate;
+      return toTimestamp(b.createdAt) - toTimestamp(a.createdAt);
+    });
+
 const toNonNegativeNumber = (value: string) => {
   if (!value.trim()) return null;
   const num = Number(value);
@@ -184,13 +200,7 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       const payload = (await res.json()) as {
         matches: Array<{ matchId: string; match: MatchRow; createdAt: string }>;
       };
-      setMatches(
-        payload.matches.slice().sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        })
-      );
+      setMatches(sortMatchesDesc(payload.matches));
     } catch (err) {
       console.error("Failed to load matches", err);
       setError(err instanceof Error ? err.message : "Failed to load matches");
@@ -262,11 +272,7 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       const payload = (await res.json()) as StoredMatch;
       const sanitizedMatch = sanitize([payload.match])[0] ?? payload.match;
       setMatches((prev) =>
-        [...prev, { ...payload, match: sanitizedMatch }].sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        })
+        sortMatchesDesc([...prev, { ...payload, match: sanitizedMatch }])
       );
       setForm((prev) => ({
         ...initialForm,
@@ -302,7 +308,10 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
     () => matches.map((m) => m.match),
     [matches]
   );
-  const clean = useMemo(() => sanitize(matchRows), [matchRows]);
+  const clean = useMemo(() => {
+    const rows = sanitize(matchRows);
+    return rows.slice().sort((a, b) => toTimestamp(a.date) - toTimestamp(b.date));
+  }, [matchRows]);
   const metrics = useMemo(() => (clean.length ? kpis(clean) : null), [clean]);
 
   return (
@@ -542,28 +551,25 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
           </p>
         ) : (
           <ul className="mt-4 space-y-3 text-sm">
-            {matches
-              .slice()
-              .reverse()
-              .map((item) => (
-                <li
-                  key={item.matchId}
-                  className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl border border-neutral-800 px-4 py-3"
-                >
-                  <div className="space-y-1">
-                    <p className="text-neutral-200">
-                      {item.match.date}{" "}
-                      {item.match.opponent ? `vs ${item.match.opponent}` : ""}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {item.match.outcome || "Result unavailable"}
-                    </p>
-                  </div>
-                  <p className="text-xs text-neutral-500">
-                    Saved {new Date(item.createdAt).toLocaleString()}
+            {matches.map((item) => (
+              <li
+                key={item.matchId}
+                className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl border border-neutral-800 px-4 py-3"
+              >
+                <div className="space-y-1">
+                  <p className="text-neutral-200">
+                    {item.match.date}{" "}
+                    {item.match.opponent ? `vs ${item.match.opponent}` : ""}
                   </p>
-                </li>
-              ))}
+                  <p className="text-xs text-neutral-500">
+                    {item.match.outcome || "Result unavailable"}
+                  </p>
+                </div>
+                <p className="text-xs text-neutral-500">
+                  Saved {new Date(item.createdAt).toLocaleString()}
+                </p>
+              </li>
+            ))}
           </ul>
         )}
       </section>
