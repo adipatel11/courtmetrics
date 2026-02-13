@@ -24,23 +24,8 @@ export default async function LandingPage() {
         </h1>
         <p className="mx-auto max-w-2xl text-sm text-neutral-400 md:text-base">
           Create a free login, enter match stats through a guided form, and see
-          charts update instantly. Passwords are hashed server-side with bcrypt
-          and your data lives safely in your own AWS DynamoDB tables.
+          your progress update instantly across every session.
         </p>
-        <div className="flex flex-wrap justify-center gap-3 text-sm text-neutral-400">
-          <div className="rounded-full border border-neutral-800 px-3 py-1">
-            Bcrypt hashing
-          </div>
-          <div className="rounded-full border border-neutral-800 px-3 py-1">
-            DynamoDB storage
-          </div>
-          <div className="rounded-full border border-neutral-800 px-3 py-1">
-            Persistent match history
-          </div>
-          <div className="rounded-full border border-neutral-800 px-3 py-1">
-            Session cookies
-          </div>
-        </div>
         <div className="flex justify-center">
           <Link
             href="/pros"

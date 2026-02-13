@@ -46,7 +46,7 @@ export default async function RootLayout({
           </header>
           <main className="flex-1">{children}</main>
           <footer className="pt-10 text-center text-xs text-neutral-500">
-            Built with secure AWS-backed auth and rich tennis analytics.
+            Track your game with focused, insight-driven tennis analytics.
           </footer>
         </div>
       </body>

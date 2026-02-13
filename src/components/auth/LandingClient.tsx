@@ -120,16 +120,6 @@ export default function LandingClient() {
         </button>
       </form>
 
-      <div className="rounded-xl bg-neutral-950 p-3 text-xs leading-relaxed text-neutral-400">
-        <p className="font-semibold text-neutral-200">Security notes</p>
-        <ul className="list-disc space-y-1 pl-4">
-          <li>Your password is hashed with bcrypt before storage.</li>
-          <li>Credentials are persisted in your AWS DynamoDB table.</li>
-          <li>
-            Sessions are signed and stored in an HTTP-only cookie for 7 days.
-          </li>
-        </ul>
-      </div>
     </div>
   );
 }
